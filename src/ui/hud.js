@@ -94,6 +94,62 @@ export function mountHUD(game, root = document.body) {
           </div>
         </div>
       </div>
+
+      <div class="input-telemetry hud-panel">
+        <div class="steer-wrap">
+          <svg id="steer-wheel" class="steer-wheel" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#e0e0e0" stroke-width="7" />
+            <rect x="9"  y="45" width="82" height="10" rx="3" fill="#2b2b2b" />
+            <rect x="45" y="50" width="10" height="41" rx="3" fill="#2b2b2b" />
+            <circle cx="50" cy="50" r="13" fill="#1c1c1c" stroke="#555" stroke-width="2" />
+            <path d="M44 53 L50 44 L56 53 Z" fill="#ffcc00" />
+            <rect x="46.5" y="6" width="7" height="11" rx="2" fill="#ffcc00" />
+          </svg>
+          <span class="input-label">STEER</span>
+        </div>
+
+        <div class="pedals">
+          <div id="pedal-handbrake" class="pedal handbrake">
+            <svg class="pedal-svg" viewBox="0 0 60 90" xmlns="http://www.w3.org/2000/svg">
+              <rect class="pedal-arm" x="27" y="2" width="6" height="20" rx="3" />
+              <rect class="pedal-pad" x="8" y="20" width="44" height="64" rx="9" />
+              <g class="pedal-treads" stroke-width="3" stroke-linecap="round">
+                <line x1="16" y1="34" x2="44" y2="34" />
+                <line x1="16" y1="46" x2="44" y2="46" />
+                <line x1="16" y1="58" x2="44" y2="58" />
+                <line x1="16" y1="70" x2="44" y2="70" />
+              </g>
+            </svg>
+            <span class="input-label">E-BRK</span>
+          </div>
+          <div id="pedal-brake" class="pedal brake">
+            <svg class="pedal-svg" viewBox="0 0 60 90" xmlns="http://www.w3.org/2000/svg">
+              <rect class="pedal-arm" x="27" y="2" width="6" height="20" rx="3" />
+              <rect class="pedal-pad" x="8" y="20" width="44" height="64" rx="9" />
+              <g class="pedal-treads" stroke-width="3" stroke-linecap="round">
+                <line x1="16" y1="34" x2="44" y2="34" />
+                <line x1="16" y1="46" x2="44" y2="46" />
+                <line x1="16" y1="58" x2="44" y2="58" />
+                <line x1="16" y1="70" x2="44" y2="70" />
+              </g>
+            </svg>
+            <span class="input-label">BRAKE</span>
+          </div>
+          <div id="pedal-throttle" class="pedal throttle">
+            <svg class="pedal-svg" viewBox="0 0 60 90" xmlns="http://www.w3.org/2000/svg">
+              <rect class="pedal-arm" x="27" y="2" width="6" height="20" rx="3" />
+              <rect class="pedal-pad" x="8" y="20" width="44" height="64" rx="9" />
+              <g class="pedal-treads" stroke-width="3" stroke-linecap="round">
+                <line x1="16" y1="34" x2="44" y2="34" />
+                <line x1="16" y1="46" x2="44" y2="46" />
+                <line x1="16" y1="58" x2="44" y2="58" />
+                <line x1="16" y1="70" x2="44" y2="70" />
+              </g>
+            </svg>
+            <span class="input-label">GAS</span>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 
@@ -118,6 +174,15 @@ export function mountHUD(game, root = document.body) {
   const cameraModeEl  = $('#camera-mode');
   const audioStatusEl = $('#audio-status');
   const gearModeBadge = $('#gear-mode-badge');
+
+  const steerWheelEl  = $('#steer-wheel');
+  const pedalThrottle = $('#pedal-throttle');
+  const pedalBrake    = $('#pedal-brake');
+  const pedalHandbrake= $('#pedal-handbrake');
+
+  // Max visual lock matches the car's low-speed steer ceiling (Car.maxSteerLow = 0.60)
+  const MAX_STEER = 0.60;
+  const STEER_LOCK_DEG = 120;
 
   // Gauge Math (Radius 85 -> Circumference ~534)
   const circumference = 2 * Math.PI * 85;
@@ -184,6 +249,15 @@ export function mountHUD(game, root = document.body) {
       boostIndEl.textContent = "STANDBY";
       boostIndEl.className = "";
     }
+
+    // Driver input visualizer: pedals depress, wheel rotates.
+    // Crossed steering sign (input.left -> +steer); negate so the wheel
+    // turns left when the player steers left.
+    const steerNorm = Math.max(-1, Math.min(1, (state.steer || 0) / MAX_STEER));
+    steerWheelEl.style.transform = `rotate(${-steerNorm * STEER_LOCK_DEG}deg)`;
+    pedalThrottle.classList.toggle('pressed', !!state.throttle);
+    pedalBrake.classList.toggle('pressed', !!state.braking);
+    pedalHandbrake.classList.toggle('pressed', !!state.handbrake);
 
     if (state.position) {
       posValueEl.textContent = state.position;

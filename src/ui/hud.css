@@ -222,6 +222,79 @@
 }
 #speed-unit { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 700; color: #888; letter-spacing: 2px; margin-top: 5px; }
 
+/* --- DRIVER INPUT VISUALIZER --- */
+.input-telemetry {
+  position: absolute;
+  bottom: 30px;
+  /* Centered within the free gap between the bottom-left controls and the
+     wider bottom-right instrument cluster (hence the left bias, not 50%). */
+  left: calc(50% - 46px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px;
+  border-bottom-color: #444;
+}
+
+.input-label {
+  display: block;
+  text-align: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #777;
+  margin-top: 8px;
+}
+
+/* Steering wheel */
+.steer-wrap { display: flex; flex-direction: column; align-items: center; }
+.steer-wheel {
+  width: 58px;
+  height: 58px;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+/* Pedals */
+.pedals { display: flex; align-items: flex-end; gap: 8px; }
+.pedal { display: flex; flex-direction: column; align-items: center; }
+.pedal-svg { width: 32px; height: 50px; }
+
+.pedal-arm  { fill: #555; }
+.pedal-pad {
+  fill: #222;
+  stroke: #555;
+  stroke-width: 2;
+  transition: fill 0.08s, stroke 0.08s, filter 0.08s;
+}
+.pedal-treads line { stroke: #555; transition: stroke 0.08s; }
+
+/* The whole SVG depresses on input */
+.pedal-svg { transition: transform 0.08s ease-out; transform-origin: 50% 10%; }
+.pedal.pressed .pedal-svg { transform: translateY(4px) scaleY(0.94); }
+
+.pedal.throttle.pressed .pedal-pad {
+  fill: #1f6b2e; stroke: #3cff6e;
+  filter: drop-shadow(0 0 6px rgba(60, 255, 110, 0.7));
+}
+.pedal.throttle.pressed .pedal-treads line { stroke: #9dffb8; }
+.pedal.throttle.pressed .input-label { color: #3cff6e; }
+
+.pedal.brake.pressed .pedal-pad {
+  fill: #7a1414; stroke: #ff3b3b;
+  filter: drop-shadow(0 0 6px rgba(255, 59, 59, 0.7));
+}
+.pedal.brake.pressed .pedal-treads line { stroke: #ff9d9d; }
+.pedal.brake.pressed .input-label { color: #ff3b3b; }
+
+.pedal.handbrake.pressed .pedal-pad {
+  fill: #6e5200; stroke: #ffcc00;
+  filter: drop-shadow(0 0 6px rgba(255, 204, 0, 0.7));
+}
+.pedal.handbrake.pressed .pedal-treads line { stroke: #ffe680; }
+.pedal.handbrake.pressed .input-label { color: #ffcc00; }
+
 /* --- LOADING SCREEN --- */
 #loading {
   position: fixed;
