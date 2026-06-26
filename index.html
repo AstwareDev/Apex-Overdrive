@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TUMO Racing</title>
+  
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght=500;700;900&display=swap" rel="stylesheet">
+  
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #000; overflow: hidden; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <!-- The game renders its WebGL canvas here -->
+    <div id="game"></div>
+
+    <!-- UI overlay mount point. Swap the default HUD for any framework by
+         rendering into this element and subscribing to the game's events. -->
+    <div id="ui-root"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

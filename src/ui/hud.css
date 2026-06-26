@@ -1,0 +1,267 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;700;900&display=swap');
+
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  font-family: 'Roboto', sans-serif;
+  color: #ffffff;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+/* --- PREMIUM MATTE PANELS --- */
+.hud-panel {
+  background: rgba(15, 15, 15, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 3px solid #ffcc00; /* Racing Yellow Accent */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+}
+
+.text-yellow { color: #ffcc00 !important; }
+.text-white { color: #ffffff !important; }
+
+/* --- TOP LEFT: RACE DATA --- */
+.top-left {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  padding: 15px 25px;
+  display: flex;
+  gap: 30px;
+}
+.data-row { display: flex; flex-direction: column; }
+.lbl { font-family: 'Oswald', sans-serif; font-size: 12px; color: #888; letter-spacing: 2px; text-transform: uppercase; }
+.val-group { display: flex; align-items: baseline; }
+.val { font-family: 'Oswald', sans-serif; font-size: 42px; font-weight: 700; line-height: 1.1; }
+.sub-val { font-size: 18px; color: #666; font-weight: 700; margin-left: 4px; }
+.panel-divider { width: 1px; background: rgba(255,255,255,0.1); }
+
+/* --- TOP RIGHT: SPECS --- */
+.top-right {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  padding: 10px 15px;
+  display: flex;
+  gap: 15px;
+  border-bottom-color: #444; /* Neutral border for top right */
+}
+.spec-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #aaa;
+}
+
+.gear-mode-auto   { color: #aaa; }
+.gear-mode-manual { color: #ffcc00; }
+
+/* --- BOTTOM LEFT: CONTROLS --- */
+.bottom-left {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  padding: 15px 20px;
+  border-bottom-color: #444;
+}
+.ctrl-header { font-family: 'Oswald', sans-serif; font-size: 12px; color: #888; letter-spacing: 2px; margin-bottom: 10px; }
+.controls-grid { display: flex; flex-direction: column; gap: 8px; }
+.key-bind { display: flex; align-items: center; font-size: 11px; font-weight: 700; }
+.m-key {
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 4px 8px;
+  margin-right: 10px;
+  color: #fff;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1px;
+}
+.key-desc { color: #888; }
+
+/* --- BOTTOM RIGHT: INSTRUMENT CLUSTER --- */
+.instrument-cluster {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+/* --- UPGRADED DRIFT MODULE --- */
+#drift-module {
+  width: 320px;
+  padding: 15px 20px;
+  border-bottom-color: #444; /* Default inactive border */
+  transition: border-color 0.2s;
+}
+.drift-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+#boost-indicator { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px; color: #555; }
+
+/* Tier Status Colors */
+.status-charging { color: #fff !important; }
+.status-tier-1 { color: #ffcc00 !important; text-shadow: 0 0 10px rgba(255, 204, 0, 0.5); }
+.status-tier-2 { color: #ff6600 !important; text-shadow: 0 0 10px rgba(255, 102, 0, 0.5); }
+.status-tier-3 { color: #ff3300 !important; text-shadow: 0 0 10px rgba(255, 51, 0, 0.5); }
+.status-boosting { color: #ffcc00 !important; animation: warning-flash 0.2s infinite alternate; }
+
+@keyframes warning-flash {
+  from { color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
+  to { color: #fff; text-shadow: 0 0 20px #fff; }
+}
+
+/* Segmented Bar Design */
+#charge-bar-wrap {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 2px;
+  overflow: hidden;
+}
+#charge-bar {
+  height: 100%;
+  width: 0%;
+  background-color: #444; /* Default fill */
+  transition: width 0.1s linear, background-color 0.2s;
+}
+/* The segmented overlay */
+.charge-segments {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.charge-segments div {
+  flex: 1;
+  border-right: 2px solid #111; /* Creates the cut segments */
+}
+.charge-segments div:last-child { border-right: none; }
+
+/* Tier Color Fill Logic */
+#charge-bar.tier-0 { background-color: #888; }
+#charge-bar.tier-1 { background-color: #ffcc00; box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
+#charge-bar.tier-2 { background-color: #ff6600; box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
+#charge-bar.tier-3 { background-color: #ff3300; box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
+
+
+.telemetry-main {
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+/* --- GEAR SHIFTER --- */
+.gear-module {
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 90px;
+  border-bottom-color: #444;
+}
+#gear-value { font-family: 'Oswald', sans-serif; font-size: 56px; font-weight: 700; color: #fff; line-height: 1; margin-top: -5px; }
+
+/* --- RADIAL SPEEDOMETER --- */
+.speedo-module {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Make panel circular */
+  border: 1px solid rgba(255,255,255,0.1);
+  border-bottom: none; /* remove accent from circle */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
+}
+.speedo-svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: rotate(135deg); /* Opens at the bottom */
+  z-index: 1;
+}
+.gauge-track {
+  fill: none;
+  stroke: #222;
+  stroke-width: 14;
+}
+.gauge-fill {
+  fill: none;
+  stroke: #ffcc00; /* Yellow default */
+  stroke-width: 14;
+  stroke-linecap: butt; /* Flat edges for motorsport look */
+  transition: stroke-dashoffset 0.08s ease-out, stroke 0.2s;
+}
+
+.speedo-readout {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+}
+#speed-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 0.9;
+  color: #fff;
+}
+#speed-unit { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 700; color: #888; letter-spacing: 2px; margin-top: 5px; }
+
+/* --- LOADING SCREEN --- */
+#loading {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.4s ease-out;
+}
+.loading-viewport {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.premium-logo { width: 300px; margin-bottom: 50px; }
+.loading-container { width: 100%; }
+#loading-bar-wrap {
+  width: 100%;
+  height: 6px;
+  background: #222;
+  border-radius: 3px;
+  overflow: hidden;
+}
+#loading-bar {
+  height: 100%;
+  width: 0%;
+  background: #ffcc00;
+  transition: width 0.2s ease-out;
+}
+.loading-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+#loading-status { color: #888; }
+#loading-percentage { color: #ffcc00; font-weight: 700; }
