@@ -1,21 +1,17 @@
 /**
- * AudioManager — real sampled audio via the Web Audio API.
+ * AudioManager — Web Audio API audio.
  *
- * Loads three files from /public/audio (engine loop, tyre skid, music) and:
- *   • pitches the engine loop with RPM (playbackRate) and lifts its volume on throttle
- *   • fades the skid loop in/out with drift intensity
- *   • loops the music bed
+ * Engine is fully synthesized (two detuned sawtooth oscillators + lowpass filter):
+ *   • idle    — low freq (~72 Hz), strong LFO wobble, muffled filter
+ *   • accel   — freq rises with gear RPM, filter opens wide for snarl
+ *   • cruise  — freq stable at current RPM, filter moderately open
  *
- * It is a pure CONSUMER of the game — it only subscribes to events. Audio is
- * unlocked on the first user gesture (browsers block autoplay).
- *
- * Swap the files in /public/audio (keep the names) to change the sounds.
+ * Skid and music are loaded from /public/audio.
  * Keys: M = mute, N = music toggle.
  */
 const FILES = {
-  engine: '/audio/engine.mp3',
-  skid:   '/audio/skid.mp3',
-  music:  '/audio/music.ogg',
+  skid:  '/audio/skid.mp3',
+  music: '/audio/music.ogg',
 };
 
 export class AudioManager {
@@ -64,7 +60,7 @@ export class AudioManager {
 
     await this._loadAll();
 
-    this._startEngine();
+    this._startSynthEngine();
     this._startSkid();
     this._startMusic();
   }
@@ -91,14 +87,46 @@ export class AudioManager {
     return src;
   }
 
-  // ── Engine: looped sample, pitch tracks RPM ────────────────────────────────
-  _startEngine() {
-    if (!this.buffers.engine) return;
-    const g = this.ctx.createGain();
-    g.gain.value = 0.0;
-    g.connect(this.master);
-    const src = this._loopSource(this.buffers.engine, g);
-    this.nodes.engine = { src, gain: g };
+  // ── Engine: synthesized oscillator bank ───────────────────────────────────
+  // Two detuned sawtooth oscillators through a lowpass filter.
+  // An LFO adds idle wobble that fades out as the car accelerates.
+  _startSynthEngine() {
+    const ctx = this.ctx;
+
+    const osc = ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.value = 72;
+
+    const osc2 = ctx.createOscillator();
+    osc2.type = 'sawtooth';
+    osc2.frequency.value = 75;
+
+    // LFO — idle breath; depth fades to zero once moving
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 7;
+    const lfoDepth = ctx.createGain();
+    lfoDepth.gain.value = 5;
+    lfo.connect(lfoDepth);
+    lfoDepth.connect(osc.frequency);
+    lfoDepth.connect(osc2.frequency);
+
+    const lpf = ctx.createBiquadFilter();
+    lpf.type = 'lowpass';
+    lpf.frequency.value = 280;
+    lpf.Q.value = 2.0;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.18;
+
+    osc.connect(lpf);
+    osc2.connect(lpf);
+    lpf.connect(gain);
+    gain.connect(this.master);
+
+    osc.start(); osc2.start(); lfo.start();
+
+    this.nodes.engine = { osc, osc2, lfo, lfoDepth, lpf, gain };
   }
 
   // ── Skid: looped sample, gated by drift ────────────────────────────────────
@@ -127,13 +155,33 @@ export class AudioManager {
     const now = this.ctx.currentTime;
 
     if (this.nodes.engine) {
-      const rpm = gearRpm(s.speedRaw ?? s.speed);   // 0..1
-      // Idle ~0.7x, redline ~2.0x playback
-      const rate = 0.7 + rpm * 1.3;
-      this.nodes.engine.src.playbackRate.setTargetAtTime(rate, now, 0.06);
-      const load = s.throttle ? 1 : (s.braking ? 0.6 : 0.35);
-      const vol  = 0.18 + 0.35 * load + 0.1 * rpm;
-      this.nodes.engine.gain.gain.setTargetAtTime(vol, now, 0.08);
+      const { osc, osc2, lfoDepth, lpf, gain } = this.nodes.engine;
+      const speed = s.speedRaw ?? s.speed ?? 0;
+      const rpm   = gearRpm(speed);   // 0..1, resets each gear
+
+      const isIdle  = speed < 4;
+      const isAccel = !isIdle && !!s.throttle;
+
+      // Frequency: low idle hum → rising pitch within each gear
+      const freq = isIdle ? 72 : 65 + rpm * 155;
+      osc.frequency.setTargetAtTime(freq,     now, 0.10);
+      osc2.frequency.setTargetAtTime(freq + (isAccel ? 5 : 3), now, 0.10);
+
+      // Wobble: full depth at idle, gone by ~6 km/h
+      lfoDepth.gain.setTargetAtTime(Math.max(0, 5 - speed * 0.8), now, 0.35);
+
+      // Filter cutoff:
+      //   idle   — muffled (~280 Hz)
+      //   cruise — moderately open, tracks speed
+      //   accel  — wide open, bright snarl
+      const cutoff = isIdle  ? 280
+        : isAccel ? Math.min(2200, 450 + speed * 5 + rpm * 700)
+        :           Math.min(900,  360 + speed * 2.5 + rpm * 200);
+      lpf.frequency.setTargetAtTime(cutoff, now, 0.08);
+
+      // Volume: quiet idle → moderate cruise → louder accel
+      const vol = isIdle ? 0.17 : isAccel ? 0.38 : 0.25;
+      gain.gain.setTargetAtTime(vol, now, 0.10);
     }
 
     if (this.nodes.skid) {
