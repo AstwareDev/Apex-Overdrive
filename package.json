@@ -1,0 +1,18 @@
+{
+  "name": "tumo_game",
+  "version": "1.0.0",
+  "description": "3D Car Racing Game",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "vite": "^8.1.0"
+  }
+}
